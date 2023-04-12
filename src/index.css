@@ -1,0 +1,86 @@
+:root {
+  --theme-font-sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Noto Sans Japanese", Meiryo, "Yu Gothic Medium", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --theme-font-sans-en: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --theme-font-mono: Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, monospace, serif;
+  --theme-svg-size: 40px;
+}
+
+:root {
+  --theme-tx-1: #1f1f1f;
+  --theme-tx-2: #444547;
+  --theme-tx-3: #8f8f8f;
+  --theme-bg-1: #ffffff;
+  --theme-bg-2: #f3f4f6;
+  --theme-bg-3: #e5e7eb;
+  --theme-bd-1: #e5e7eb;
+  --theme-bd-2: #d1d5db;
+  --theme-bd-3: #9ca3af;
+  --theme-lk-1: #0b57d0;
+  --theme-lk-tx: #ffffff;
+  --theme-ac-1: #f61616;
+}
+
+*,
+::before,
+::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+html {
+  font-family: var(--theme-font-sans);
+  word-break: break-word;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--theme-bg-1);
+  color: var(--theme-tx-2);
+  font-size: 16px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+ol,
+ul {
+  list-style: none;
+}
+
+a {
+  color: var(--theme-lk-1);
+  text-decoration: underline;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  a:hover {
+    text-decoration: none;
+  }
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--theme-tx-1);
+  font-weight: 700;
+  line-height: 1.125;
+}
+
+input[type="button"] {
+  padding: 4px 20px;
+}

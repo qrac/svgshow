@@ -1,0 +1,51 @@
+{
+  "name": "svgshow",
+  "description": "SVG Sprite Viewer",
+  "version": "0.1.0",
+  "license": "MIT",
+  "homepage": "https://github.com/qrac/svgshow",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qrac/svgshow"
+  },
+  "bugs": {
+    "url": "https://github.com/qrac/svgshow/issues"
+  },
+  "keywords": [
+    "svg",
+    "svg-sprite",
+    "viewer",
+    "japanese",
+    "svgshow"
+  ],
+  "author": {
+    "name": "Qrac",
+    "url": "https://qrac.jp"
+  },
+  "organization": {
+    "name": "QRANOKO",
+    "url": "https://qranoko.jp"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "clean": "rimraf ./dist"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^3.1.0",
+    "dompurify": "^3.0.1",
+    "preact": "^10.13.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.0.4",
+    "vite": "^4.2.1",
+    "vite-plugin-svgr": "^2.4.0"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^3.0.1",
+    "@types/node": "^18.15.11",
+    "@types/react": "^18.0.35",
+    "@types/react-dom": "^18.0.11"
+  }
+}
