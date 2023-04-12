@@ -16,7 +16,7 @@
 
 ## Security
 
-使用上の一般的な XSS 対策は施されています。ブラウザで参照する SVG スプライトはレンダリング前に [Dompurify](https://www.npmjs.com/package/dompurify) でサニタイズ処理を行います。
+- XSS 対策: SVG レンダリング前に [Dompurify](https://www.npmjs.com/package/dompurify) でサニタイズ処理
 
 ## License
 
