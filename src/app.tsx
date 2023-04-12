@@ -55,7 +55,6 @@ export default function App() {
 
   function readSvgFiles(svgFiles: File[]) {
     if (!svgFiles.length) return
-
     for (let i = 0; i < svgFiles.length; i++) {
       const reader = new FileReader()
       reader.onloadend = (e) => readSvgSprite(e, svgFiles[i].name)
@@ -63,12 +62,16 @@ export default function App() {
     }
   }
 
+  function handleRemove(index: number) {
+    const items = [...spriteFiles]
+    items.splice(index, 1)
+    setSpriteFiles(items)
+  }
+
   function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
     if (!e.target.files) return refReset()
-
     const files = Array.from(e.target.files)
     const svgFiles = files.filter((file) => file.name.endsWith(".svg"))
-
     readSvgFiles(svgFiles)
     refReset()
   }
@@ -117,7 +120,13 @@ export default function App() {
           <article className="block-sprite" key={spriteFileIndex}>
             <header className="block-sprite-header">
               <h2 className="block-sprite-title">{spriteFile.fileName}</h2>
-              {/*<button className="block-sprite-clear">表示を解除</button>*/}
+              <button
+                type="button"
+                onClick={() => handleRemove(spriteFileIndex)}
+                className="block-sprite-clear"
+              >
+                表示を解除
+              </button>
             </header>
             <ul className="block-sprite-items">
               {spriteFile.items.map((item, index) => (
