@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useCallback } from "react"
 import DOMPurify from "dompurify"
 
 import "./app.css"
@@ -19,7 +19,12 @@ type SpriteItem = {
 
 export default function App() {
   const [spriteFiles, setSpriteFiles] = useState<SpriteFile[]>([])
+  const [isDraggingOver, setIsDraggingOver] = useState(false)
   const attachRef = useRef<HTMLInputElement>(null)
+
+  function refReset() {
+    if (attachRef.current) attachRef.current.value = ""
+  }
 
   function parseSvgSprite(value: string) {
     const parser = new DOMParser()
@@ -38,31 +43,61 @@ export default function App() {
     return spriteItems
   }
 
-  function handleRead(event: ProgressEvent<FileReader>, fileName: string) {
-    if (!event.target) return
-    if (typeof event.target.result === "string") {
-      const html = DOMPurify.sanitize(event.target.result)
+  function readSvgSprite(e: ProgressEvent<FileReader>, fileName: string) {
+    if (!e.target) return
+    if (typeof e.target.result === "string") {
+      const html = DOMPurify.sanitize(e.target.result)
       const items = parseSvgSprite(html)
       const spriteFile: SpriteFile = { fileName, items }
       setSpriteFiles((current) => [...current, spriteFile])
     }
   }
 
-  function handleInput(event: React.ChangeEvent<HTMLInputElement>) {
-    if (!event.target.files) return
-
-    const files = Array.from(event.target.files)
-    const svgFiles = files.filter((file) => file.name.endsWith(".svg"))
-
+  function readSvgFiles(svgFiles: File[]) {
     if (!svgFiles.length) return
 
     for (let i = 0; i < svgFiles.length; i++) {
       const reader = new FileReader()
-      reader.onloadend = (event) => handleRead(event, svgFiles[i].name)
+      reader.onloadend = (e) => readSvgSprite(e, svgFiles[i].name)
       reader.readAsText(svgFiles[i])
     }
-    if (attachRef.current) attachRef.current.value = ""
   }
+
+  function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!e.target.files) return refReset()
+
+    const files = Array.from(e.target.files)
+    const svgFiles = files.filter((file) => file.name.endsWith(".svg"))
+
+    readSvgFiles(svgFiles)
+    refReset()
+  }
+
+  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingOver(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    setIsDraggingOver(false)
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const files = Array.from(e.dataTransfer.items)
+      .map((item) => item.getAsFile())
+      .filter((file): file is File => file !== null)
+    const svgFiles = files.filter((file) => file.name.endsWith(".svg"))
+    readSvgFiles(svgFiles)
+    setIsDraggingOver(false)
+  }, [])
   return (
     <div className="app">
       <header className="app-header">
@@ -109,18 +144,36 @@ export default function App() {
         ))}
       </main>
       <aside className="app-aside">
-        <input
-          type="button"
-          value="ファイル参照"
-          onClick={() => attachRef.current?.click()}
-        />
-        <input
-          type="file"
-          style={{ display: "none" }}
-          ref={attachRef}
-          multiple
-          onChange={handleInput}
-        />
+        <div
+          className={
+            isDraggingOver ? "block-selection is-over" : "block-selection"
+          }
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <div className="block-selection-contents">
+            <p className="block-selection-title">
+              ファイルをドラッグアンドドロップ
+            </p>
+            <div className="block-selection-buttons">
+              <input
+                className="block-selection-button"
+                type="button"
+                value="ファイルを選択"
+                onClick={() => attachRef.current?.click()}
+              />
+              <input
+                type="file"
+                style={{ display: "none" }}
+                ref={attachRef}
+                multiple
+                onChange={handleInput}
+              />
+            </div>
+          </div>
+        </div>
       </aside>
     </div>
   )
