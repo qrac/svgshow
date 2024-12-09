@@ -2,8 +2,8 @@ import { useState, useRef, useCallback } from "react"
 import DOMPurify from "dompurify"
 
 import "./app.css"
-import { ReactComponent as Logo } from "./logo.svg"
-import { ReactComponent as GithubLogo } from "./github.svg"
+import Logo from "./logo.svg?react"
+import GithubLogo from "./github.svg?react"
 import { version, repository } from "../package.json"
 
 type SpriteFile = {

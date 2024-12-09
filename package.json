@@ -30,22 +30,24 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "clean": "rimraf ./dist"
+    "clean": "rimraf ./dist",
+    "up": "npx npm-check-updates",
+    "up:u": "npx npm-check-updates -u"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^3.1.0",
-    "dompurify": "^3.0.1",
-    "preact": "^10.13.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "typescript": "^5.0.4",
-    "vite": "^4.2.1",
-    "vite-plugin-svgr": "^2.4.0"
+    "@vitejs/plugin-react": "^4.3.4",
+    "dompurify": "^3.2.3",
+    "preact": "^10.25.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "vite-plugin-svgr": "^4.3.0"
   },
   "devDependencies": {
-    "@types/dompurify": "^3.0.1",
-    "@types/node": "^18.15.11",
-    "@types/react": "^18.0.35",
-    "@types/react-dom": "^18.0.11"
+    "@types/dompurify": "^3.2.0",
+    "@types/node": "^22.10.1",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1"
   }
 }
