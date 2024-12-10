@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react"
+import { FiDownload } from "react-icons/fi"
 import { SiGithub } from "react-icons/si"
 import DOMPurify from "dompurify"
 
@@ -109,72 +110,76 @@ export default function App() {
   }, [])
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="block-titles">
-          <h1 className="block-title">
-            <Logo className="block-title-logo" title="svgshow" />
+      <header className="box is-flex is-middle is-between is-nowrap is-gap-sm">
+        <div className="box is-flex is-middle is-nowrap is-gap-xs">
+          <h1>
+            <Logo className="logo" title="svgshow" />
           </h1>
-          <span className="block-version">v{version}</span>
-          <h2 className="block-subtitle">SVG Sprite Viewer</h2>
-          <a className="block-link-icon" href={repository.url}>
-            <SiGithub className="block-github" />
+          <span className="box is-outline is-px-xxs is-radius-xs">
+            <div className="text is-mono is-xs">v{version}</div>
+          </span>
+          <h2 className="text is-mono is-xs is-flex-0">SVG Sprite Viewer</h2>
+        </div>
+        <div className="box">
+          <a className="button is-melt is-circle is-sm" href={repository.url}>
+            <SiGithub className="icon is-xl" />
           </a>
         </div>
       </header>
-      <main className="app-main">
+      <main className="main">
         {spriteFiles.map((spriteFile, spriteFileIndex) => (
-          <article className="block-sprite" key={spriteFileIndex}>
-            <header className="block-sprite-header">
-              <h2 className="block-sprite-title">{spriteFile.fileName}</h2>
-              <button
-                type="button"
-                onClick={() => handleRemove(spriteFileIndex)}
-                className="block-sprite-clear"
-              >
-                表示を解除
-              </button>
+          <article className="sprite is-space-md" key={spriteFileIndex}>
+            <header className="box is-flex is-middle is-between is-gap-sm is-pb-xs is-outline-bottom">
+              <div className="box">
+                <h2 className="text is-mono is-lg">{spriteFile.fileName}</h2>
+              </div>
+              <div className="box">
+                <button
+                  type="button"
+                  onClick={() => handleRemove(spriteFileIndex)}
+                  className="button is-outline is-round is-xs"
+                >
+                  表示を解除
+                </button>
+              </div>
             </header>
-            <ul className="block-sprite-items">
+            <ul className="sprite-items">
               {spriteFile.items.map((item, index) => (
                 <li
-                  //role="button"
-                  //tabIndex={0}
-                  className="block-sprite-item"
+                  className="box is-p-lg is-outline is-radius-sm is-space-sm"
                   key={index}
                 >
-                  <div className="block-sprite-svg-wrap">
+                  <div className="box">
                     <svg
-                      className="block-sprite-svg"
+                      className="sprite-svg"
                       xmlns="http://www.w3.org/2000/svg"
                       xmlnsXlink="http://www.w3.org/1999/xlink"
                       viewBox={item.viewBox}
                       dangerouslySetInnerHTML={{ __html: item.paths }}
                     />
                   </div>
-                  <p className="block-sprite-id">{item.id}</p>
+                  <p className="text is-mono is-center is-line-height-xs is-xs">
+                    {item.id}
+                  </p>
                 </li>
               ))}
             </ul>
           </article>
         ))}
       </main>
-      <aside className="app-aside">
+      <aside className="aside">
         <div
-          className={
-            isDraggingOver ? "block-selection is-over" : "block-selection"
-          }
+          className={isDraggingOver ? "selection is-over" : "selection"}
           onDragEnter={handleDragEnter}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <div className="block-selection-contents">
-            <p className="block-selection-title">
-              ファイルをドラッグアンドドロップ
-            </p>
-            <div className="block-selection-buttons">
+          <div className="box is-space-sm">
+            <p className="text is-center">ファイルをドラッグアンドドロップ</p>
+            <div className="box is-flex is-center">
               <input
-                className="block-selection-button"
+                className="button is-outline"
                 type="button"
                 value="ファイルを選択"
                 onClick={() => attachRef.current?.click()}

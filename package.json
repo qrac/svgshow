@@ -1,7 +1,7 @@
 {
   "name": "svgshow",
   "description": "SVG Sprite Viewer",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "type": "module",
   "license": "MIT",
   "homepage": "https://github.com/qrac/svgshow",
@@ -38,6 +38,7 @@
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",
     "dompurify": "^3.2.3",
+    "musubii": "^8.3.0",
     "preact": "^10.25.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
