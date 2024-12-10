@@ -2,6 +2,7 @@
   "name": "svgshow",
   "description": "SVG Sprite Viewer",
   "version": "0.3.1",
+  "type": "module",
   "license": "MIT",
   "homepage": "https://github.com/qrac/svgshow",
   "repository": {
