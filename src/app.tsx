@@ -1,9 +1,9 @@
 import { useState, useRef, useCallback } from "react"
+import { SiGithub } from "react-icons/si"
 import DOMPurify from "dompurify"
 
 import "./app.css"
 import Logo from "./logo.svg?react"
-import GithubLogo from "./github.svg?react"
 import { version, repository } from "../package.json"
 
 type SpriteFile = {
@@ -117,7 +117,7 @@ export default function App() {
           <span className="block-version">v{version}</span>
           <h2 className="block-subtitle">SVG Sprite Viewer</h2>
           <a className="block-link-icon" href={repository.url}>
-            <GithubLogo className="block-github" />
+            <SiGithub className="block-github" />
           </a>
         </div>
       </header>
