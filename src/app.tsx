@@ -17,6 +17,12 @@ type SpriteItem = {
   paths: string
 }
 
+DOMPurify.addHook("uponSanitizeAttribute", (node, data) => {
+  if (!data.attrName.match(/^on\w+/)) {
+    data.forceKeepAttr = true
+  }
+})
+
 export default function App() {
   const [spriteFiles, setSpriteFiles] = useState<SpriteFile[]>([])
   const [isDraggingOver, setIsDraggingOver] = useState(false)
