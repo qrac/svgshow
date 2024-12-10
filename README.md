@@ -1,18 +1,12 @@
 # svgshow
 
-<p>
-  <a aria-label="Made by QRANOKO" href="https://qranoko.jp">
-    <img src="https://img.shields.io/badge/MADE%20BY%20QRANOKO-212121.svg?style=for-the-badge&labelColor=212121">
-  </a>
-</p>
-
-## Web Tool
+## App
 
 - https://svgshow.qranoko.jp
 
 ## About
 
-ブラウザで SVG スプライトファイル内の各 SVG を id 毎の一覧で確認できます。
+ブラウザで SVG スプライトファイル内の SVG を表示確認できます。
 
 ## Security
 
