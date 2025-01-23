@@ -54,6 +54,8 @@ export async function optimizeSvgFiles(svgFiles: SvgFile[]) {
     "svgo/dist/svgo.browser" as any
   )
   return svgFiles.map((svgFile) => {
+    const regex = /id="([^"]*?[^\x00-\x7F]+[^"]*?)"/g
+    const hasDirtyId = svgFile.code.match(regex)
     return {
       ...svgFile,
       code: optimize(svgFile.code, {
@@ -62,7 +64,47 @@ export async function optimizeSvgFiles(svgFiles: SvgFile[]) {
             name: "preset-default",
             params: {
               overrides: {
-                removeHiddenElems: false, // `removeUnusedDefs` を無効化
+                //removeDoctype: false,
+                //removeXMLProcInst: false,
+                //removeComments: false,
+                //removeMetadata: false,
+                //removeEditorsNSData: false,
+                //cleanupAttrs: false,
+                //mergeStyles: false,
+                //inlineStyles: false,
+                //minifyStyles: false,
+                cleanupIds: {
+                  //remomve: false,
+                  remove: hasDirtyId ? true : false,
+                  //minify: false,
+                  //minify: hasDirtyId ? true : false,
+                  //preserve: ["close"],
+                },
+                //removeUselessDefs: false,
+                //cleanupNumericValues: false,
+                //convertColors: false,
+                //removeUnknownsAndDefaults: false,
+                //removeNonInheritableGroupAttrs: false,
+                //removeUselessStrokeAndFill: false,
+                //removeViewBox: false,
+                //cleanupEnableBackground: false,
+                removeHiddenElems: false,
+                //removeEmptyText: false,
+                //convertShapeToPath: false,
+                //convertEllipseToCircle: false,
+                //moveElemsAttrsToGroup: false,
+                //moveGroupAttrsToElems: false,
+                //collapseGroups: false,
+                //convertPathData: false,
+                //convertTransform: false,
+                //removeEmptyAttrs: false,
+                //removeEmptyContainers: false,
+                //mergePaths: false,
+                //removeUnusedNS: false,
+                //sortAttrs: false,
+                //sortDefsChildren: false,
+                //removeTitle: false,
+                //removeDesc: false,
               },
             },
           },
