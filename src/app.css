@@ -1,3 +1,72 @@
+@import "musubii/src/bases/theme/light.css";
+/*@import "musubii/src/bases/theme/dark-attr.css";*/
+@import "musubii/src/bases/typo/font.css";
+@import "musubii/src/bases/base/reset.css";
+@import "musubii/src/bases/base/html.css";
+/*@import "musubii/src/layouts/section/main.css";*/
+@import "musubii/src/layouts/box/main.css";
+/*@import "musubii/src/layouts/card/main.css";*/
+/*@import "musubii/src/layouts/grid/main.css";*/
+@import "musubii/src/layouts/joint/main.css";
+@import "musubii/src/elements/text/main.css";
+/*@import "musubii/src/elements/text/fablet.css";*/
+/*@import "musubii/src/elements/text/tablet.css";*/
+/*@import "musubii/src/elements/text/desktop.css";*/
+/*@import "musubii/src/elements/text/wide.css";*/
+/*@import "musubii/src/elements/text/blockquote.css";*/
+/*@import "musubii/src/elements/text/code.css";*/
+@import "musubii/src/elements/icon/main.css";
+@import "musubii/src/elements/button/main.css";
+/*@import "musubii/src/elements/badge/main.css";*/
+@import "musubii/src/elements/alert/main.css";
+/*@import "musubii/src/elements/list/main.css";*/
+/*@import "musubii/src/elements/table/main.css";*/
+@import "musubii/src/elements/form/main.css";
+/*@import "musubii/src/elements/form/select.css";*/
+/*@import "musubii/src/elements/form/label.css";*/
+/*@import "musubii/src/elements/form/radio.css";*/
+/*@import "musubii/src/elements/form/checkbox.css";*/
+/*@import "musubii/src/elements/iframe/main.css";*/
+/*@import "musubii/src/elements/wysiwyg/main.css";*/
+/*@import "musubii/src/utilities/display/main.css";*/
+/*@import "musubii/src/utilities/display/fablet.css";*/
+/*@import "musubii/src/utilities/display/tablet.css";*/
+/*@import "musubii/src/utilities/display/desktop.css";*/
+/*@import "musubii/src/utilities/display/wide.css";*/
+@import "musubii/src/utilities/flex/main.css";
+/*@import "musubii/src/utilities/flex/fablet.css";*/
+/*@import "musubii/src/utilities/flex/tablet.css";*/
+/*@import "musubii/src/utilities/flex/desktop.css";*/
+/*@import "musubii/src/utilities/flex/wide.css";*/
+/*@import "musubii/src/utilities/float/main.css";*/
+@import "musubii/src/utilities/space/main.css";
+@import "musubii/src/utilities/margin/main.css";
+@import "musubii/src/utilities/negative/main.css";
+@import "musubii/src/utilities/padding/main.css";
+@import "musubii/src/utilities/radius/main.css";
+@import "musubii/src/utilities/size/main.css";
+/*@import "musubii/src/utilities/size/fablet.css";*/
+/*@import "musubii/src/utilities/size/tablet.css";*/
+/*@import "musubii/src/utilities/size/desktop.css";*/
+/*@import "musubii/src/utilities/size/wide.css";*/
+/*@import "musubii/src/utilities/overflow/main.css";*/
+
+:root {
+  --theme-tx-3: #94a3b8; /* tailwind slate-400 #94a3b8 */
+  --theme-ac-1: #475569; /* tailwind slate-600 #475569 */
+  --theme-ac-2: #2563eb; /* tailwind blue-600 #2563eb */
+  --theme-primary: #2563eb; /* tailwind blue-600 #2563eb */
+}
+
+.button {
+  --button-gap: 0.25em;
+  --button-font-weight: 400;
+}
+
+body {
+  background-color: var(--theme-bg-2);
+}
+
 .app {
   padding: 32px;
 }
@@ -6,43 +75,56 @@
   margin-top: 32px;
 }
 
-.main > * + * {
-  margin-top: 32px;
-}
-
 .logo {
   flex: none;
-  display: block;
-  width: 140px;
-  height: auto;
+  font-size: 20px;
+  font-weight: 900;
+  font-family: var(--font-sans-en);
+  white-space: nowrap;
 }
 
-.link-icon {
-  flex: none;
-  display: block;
-  padding: 4px;
-  border-radius: 999em;
-  color: var(--theme-tx-3);
+.logo-text.is-ac-1 {
+  color: var(--theme-ac-1);
 }
 
-@media (hover: hover) {
-  .link-icon:hover {
-    color: var(--theme-tx-2);
-  }
-}
-
-.link-icon > svg {
-  display: block;
-  width: 24px;
-  height: 24px;
-  fill: currentColor;
+.logo-text.is-ac-2 {
+  color: var(--theme-ac-2);
 }
 
 .sprite-items {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   grid-template-rows: auto;
-  gap: 12px;
+  gap: 12px 8px;
+}
+
+.sprite-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: 1fr auto;
+  background: var(--theme-bg-1);
+  border-radius: 10px;
+}
+
+.sprite-item .button.is-delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-radius: 0 10px 0 6px;
+  z-index: 1;
+}
+
+.sprite-item .button.is-delete.is-danger:not(:hover) {
+  --button-melt-color: var(--theme-tx-3);
+}
+
+.sprite-item .button.is-edit {
+  border-radius: 0 0 0 10px;
+}
+
+.sprite-item .button.is-download {
+  border-radius: 0 0 10px 0;
 }
 
 .sprite-svg {
@@ -56,17 +138,24 @@
 .selection {
   display: grid;
   place-content: center;
-  min-height: 30vh;
   padding: 20px;
-  background-color: var(--theme-bg-1);
-  border: 2px dashed var(--theme-lk-1);
-  border-radius: 6px;
+  background-color: var(--theme-bg-2);
+  border: 1px dashed var(--theme-ac-2);
+  border-radius: 8px;
+}
+
+.selection.is-min-height-30vh {
+  min-height: 30vh;
+}
+
+.selection.is-min-height-150px {
+  min-height: 150px;
 }
 
 .selection.is-over {
-  background-color: var(--theme-bg-2);
+  background-color: var(--theme-bg-1);
 }
 
-.text.is-mono {
+.is-mono {
   font-family: var(--font-mono);
 }

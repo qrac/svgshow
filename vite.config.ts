@@ -1,6 +1,5 @@
 import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
-import svgr from "vite-plugin-svgr"
 
 const preactAlias = [
   {
@@ -14,16 +13,8 @@ const preactAlias = [
 ]
 
 export default defineConfig({
-  plugins: [react(), svgr()],
+  plugins: [react()],
   resolve: {
     alias: process.env.NODE_ENV === "production" ? preactAlias : [],
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        entryFileNames: `assets/[name].js`,
-        assetFileNames: `assets/[name][extname]`,
-      },
-    },
   },
 })

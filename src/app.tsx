@@ -1,196 +1,426 @@
-import { useState, useRef, useCallback } from "react"
-import { FiDownload } from "react-icons/fi"
+import { useState, useRef } from "react"
 import { SiGithub } from "react-icons/si"
-import DOMPurify from "dompurify"
+import { clsx } from "clsx"
+import { FiEdit3, FiX, FiDownload, FiTrash2, FiPlus } from "react-icons/fi"
+
+import type { Sprite } from "./utils"
+import {
+  getName,
+  readSvgFiles,
+  optimizeSvgFiles,
+  parseSymbols,
+  generateSpriteCode,
+  generateSvgCode,
+} from "./utils"
 
 import "./app.css"
-import Logo from "./logo.svg?react"
 import { version, repository } from "../package.json"
 
-type SpriteFile = {
-  fileName: string
-  items: SpriteItem[]
-}
-
-type SpriteItem = {
-  id: string
-  viewBox: string
-  paths: string
-}
-
-DOMPurify.addHook("uponSanitizeAttribute", (node, data) => {
-  if (!data.attrName.match(/^on\w+/)) {
-    data.forceKeepAttr = true
-  }
-})
-
 export default function App() {
-  const [spriteFiles, setSpriteFiles] = useState<SpriteFile[]>([])
-  const [isDraggingOver, setIsDraggingOver] = useState(false)
-  const attachRef = useRef<HTMLInputElement>(null)
+  const [sprites, setSprites] = useState<Sprite[]>([])
+  const [dragging, setDragging] = useState("")
+  const [editing, setEditing] = useState<{
+    spriteIndex: number
+    symbolIndex?: number
+  } | null>(null)
+  const addSpriteRef = useRef<HTMLInputElement>(null)
+  const addSymbolRefs = useRef<HTMLInputElement[]>([])
 
-  function refReset() {
-    if (attachRef.current) attachRef.current.value = ""
-  }
+  async function uploadFiles(
+    files: File[],
+    targetName: string,
+    spriteIndex?: number
+  ) {
+    const svgFiles = await readSvgFiles(files)
+    const optimizedSvgFiles = await optimizeSvgFiles(svgFiles)
 
-  function parseSvgSprite(value: string) {
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(value, "image/svg+xml")
-    const symbols = Array.from(doc.querySelectorAll("symbol"))
-
-    let spriteItems: SpriteItem[] = symbols.map((symbol) => {
-      const id = symbol.getAttribute("id") || ""
-      const viewBox = symbol.getAttribute("viewBox") || ""
-      const paths = symbol.innerHTML || ""
-      return { id, viewBox, paths }
-    })
-    spriteItems = spriteItems.filter((item) => {
-      if (item.id && item.viewBox && item.paths) return item
-    })
-    return spriteItems
-  }
-
-  function readSvgSprite(e: ProgressEvent<FileReader>, fileName: string) {
-    if (!e.target) return
-    if (typeof e.target.result === "string") {
-      const html = DOMPurify.sanitize(e.target.result)
-      const items = parseSvgSprite(html)
-      const spriteFile: SpriteFile = { fileName, items }
-      setSpriteFiles((current) => [...current, spriteFile])
+    if (targetName === "sprite") {
+      optimizedSvgFiles.forEach((svgFile) => {
+        const { symbols, isSprite } = parseSymbols(
+          svgFile.fileName,
+          svgFile.code
+        )
+        const fileName = isSprite ? getName(svgFile.fileName) : "sprite"
+        setSprites((current) => [...current, { fileName, symbols }])
+      })
+      addSpriteRef.current && (addSpriteRef.current.value = "")
+    }
+    if (targetName === "symbol" && spriteIndex !== undefined) {
+      optimizedSvgFiles.forEach((svgFile) => {
+        const { symbols } = parseSymbols(svgFile.fileName, svgFile.code)
+        setSprites((current) =>
+          current.map((sprite, i) =>
+            i === spriteIndex
+              ? { ...sprite, symbols: [...sprite.symbols, ...symbols] }
+              : sprite
+          )
+        )
+      })
     }
   }
 
-  function readSvgFiles(svgFiles: File[]) {
-    if (!svgFiles.length) return
-    for (let i = 0; i < svgFiles.length; i++) {
-      const reader = new FileReader()
-      reader.onloadend = (e) => readSvgSprite(e, svgFiles[i].name)
-      reader.readAsText(svgFiles[i])
+  function handleEditStart(spriteIndex: number, symbolIndex?: number) {
+    setEditing({ spriteIndex, symbolIndex })
+  }
+
+  function handleEditEnd(
+    newValue: string,
+    spriteIndex: number,
+    symbolIndex?: number
+  ) {
+    setEditing(null)
+
+    if (symbolIndex === undefined) {
+      setSprites((current) =>
+        current.map((sprite, i) => {
+          if (i === spriteIndex) {
+            return { ...sprite, fileName: newValue }
+          } else {
+            return sprite
+          }
+        })
+      )
+    } else {
+      setSprites((current) =>
+        current.map((sprite, i) => {
+          if (i === spriteIndex) {
+            return {
+              ...sprite,
+              symbols: sprite.symbols.map((symbol, j) =>
+                j === symbolIndex ? { ...symbol, id: newValue } : symbol
+              ),
+            }
+          } else {
+            return sprite
+          }
+        })
+      )
     }
   }
 
-  function handleRemove(index: number) {
-    const items = [...spriteFiles]
-    items.splice(index, 1)
-    setSpriteFiles(items)
+  function handleRemove(spriteIndex: number, symbolIndex?: number) {
+    if (symbolIndex === undefined) {
+      setSprites((current) => current.filter((_, i) => i !== spriteIndex))
+    } else {
+      setSprites((current) =>
+        current.map((sprite, i) => {
+          if (i === spriteIndex) {
+            return {
+              ...sprite,
+              symbols: sprite.symbols.filter((_, j) => j !== symbolIndex),
+            }
+          } else {
+            return sprite
+          }
+        })
+      )
+    }
   }
 
-  function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
-    if (!e.target.files) return refReset()
-    const files = Array.from(e.target.files)
-    const svgFiles = files.filter((file) => file.name.endsWith(".svg"))
-    readSvgFiles(svgFiles)
-    refReset()
+  function handleDownload(spriteIndex: number, symbolIndex?: number) {
+    if (symbolIndex === undefined) {
+      const sprite = sprites[spriteIndex]
+      const code = generateSpriteCode(sprite.symbols)
+      const blob = new Blob([code], { type: "image/svg+xml" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = sprite.fileName + ".svg"
+      a.click()
+      URL.revokeObjectURL(url)
+    } else {
+      const sprite = sprites[spriteIndex]
+      const symbol = sprite.symbols[symbolIndex]
+      const code = generateSvgCode(symbol)
+      const blob = new Blob([code], { type: "image/svg+xml" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = symbol.id + ".svg"
+      a.click()
+      URL.revokeObjectURL(url)
+    }
   }
 
-  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  function handleDragOver(
+    e: React.DragEvent<HTMLDivElement>,
+    targetName: string,
+    spriteIndex?: number
+  ) {
     e.preventDefault()
-  }, [])
+    const indesStr = spriteIndex === undefined ? "" : `-${spriteIndex}`
+    setDragging(targetName + indesStr)
+  }
 
-  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  function handleDragLeave(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault()
-    e.stopPropagation()
-    setIsDraggingOver(true)
-  }, [])
+    setDragging("")
+  }
 
-  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  async function handleDrop(
+    e: React.DragEvent<HTMLDivElement>,
+    targetName: string,
+    spriteIndex?: number
+  ) {
     e.preventDefault()
-    setIsDraggingOver(false)
-  }, [])
+    setDragging("")
+    const files = [...e.dataTransfer.files]
+    if (files.length === 0) return
+    await uploadFiles(files, targetName, spriteIndex)
+    e.dataTransfer.clearData()
+  }
 
-  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const files = Array.from(e.dataTransfer.items)
-      .map((item) => item.getAsFile())
-      .filter((file): file is File => file !== null)
-    const svgFiles = files.filter((file) => file.name.endsWith(".svg"))
-    readSvgFiles(svgFiles)
-    setIsDraggingOver(false)
-  }, [])
+  async function handleFile(
+    e: React.ChangeEvent<HTMLInputElement>,
+    targetName: string,
+    spriteIndex?: number
+  ) {
+    const files = [...e.target.files]
+    if (files.length === 0) return
+    await uploadFiles(files, targetName, spriteIndex)
+  }
+
+  function handleNew() {
+    setSprites((current) => [
+      ...current,
+      {
+        fileName: "sprite",
+        symbols: [],
+      },
+    ])
+  }
   return (
     <div className="app">
-      <header className="box is-flex is-middle is-between is-nowrap is-gap-sm">
-        <div className="box is-flex is-middle is-nowrap is-gap-xs">
-          <h1>
-            <Logo className="logo" title="svgshow" />
+      <header className="box is-flex is-middle is-gap-md is-nt-sm">
+        <div className="box is-flex is-baseline is-gap-x-sm is-flex-0">
+          <h1 className="logo">
+            <span>
+              <span className="logo-text is-ac-1">svg</span>
+              <span className="logo-text is-ac-2">show</span>
+            </span>
           </h1>
-          <span className="box is-outline is-px-xxs is-radius-xs">
-            <div className="text is-mono is-xs">v{version}</div>
-          </span>
-          <h2 className="text is-mono is-xs is-flex-0">SVG Sprite Viewer</h2>
+          <p className="text is-xs">v{version}</p>
+          <h2 className="text is-xs">ブラウザでSVGスプライトファイルを編集</h2>
         </div>
-        <div className="box">
-          <a className="button is-melt is-circle is-sm" href={repository.url}>
-            <SiGithub className="icon is-xl" />
+        <div className="box is-flex is-middle">
+          <a
+            href={repository.url}
+            target="_blank"
+            className="box is-flex is-middle"
+          >
+            <SiGithub className="icon is-lg" />
           </a>
         </div>
       </header>
-      <main className="main">
-        {spriteFiles.map((spriteFile, spriteFileIndex) => (
-          <article className="sprite is-space-md" key={spriteFileIndex}>
-            <header className="box is-flex is-middle is-between is-gap-sm is-pb-xs is-outline-bottom">
-              <div className="box">
-                <h2 className="text is-mono is-lg">{spriteFile.fileName}</h2>
-              </div>
-              <div className="box">
+
+      <main className="box is-space-xxl">
+        {sprites.map((sprite, spriteIndex) => (
+          <div className="box is-space-sm" key={spriteIndex}>
+            <div className="box is-flex is-between is-middle is-gap-x-md">
+              <div className="box is-flex is-middle is-gap-xxs">
+                {editing?.spriteIndex === spriteIndex &&
+                editing?.symbolIndex === undefined ? (
+                  <div className="text is-mono">
+                    <input
+                      type="text"
+                      className="input is-sm"
+                      defaultValue={sprite.fileName}
+                      onBlur={(e) =>
+                        handleEditEnd(e.target.value, spriteIndex, undefined)
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleEditEnd(
+                            e.currentTarget.value,
+                            spriteIndex,
+                            undefined
+                          )
+                        }
+                      }}
+                      autoFocus
+                    />
+                    <span className="text">.svg</span>
+                  </div>
+                ) : (
+                  <div className="text is-mono">
+                    <span className="text">{sprite.fileName}</span>
+                    <span className="text">.svg</span>
+                  </div>
+                )}
                 <button
                   type="button"
-                  onClick={() => handleRemove(spriteFileIndex)}
-                  className="button is-outline is-round is-xs"
+                  className="button is-melt is-circle is-sm"
+                  onClick={() => handleEditStart(spriteIndex)}
                 >
-                  表示を解除
+                  <FiEdit3 className="icon" />
                 </button>
               </div>
-            </header>
-            <ul className="sprite-items">
-              {spriteFile.items.map((item, index) => (
-                <li
-                  className="box is-p-lg is-outline is-radius-sm is-space-sm"
-                  key={index}
+              <div className="box is-flex is-middle is-gap-xxs">
+                <button
+                  type="button"
+                  className="button is-outline is-xs"
+                  onClick={() => handleRemove(spriteIndex)}
                 >
-                  <div className="box">
-                    <svg
-                      className="sprite-svg"
-                      xmlns="http://www.w3.org/2000/svg"
-                      xmlnsXlink="http://www.w3.org/1999/xlink"
-                      viewBox={item.viewBox}
-                      dangerouslySetInnerHTML={{ __html: item.paths }}
-                    />
+                  <FiX className="icon" />
+                  <span className="text">表示を解除</span>
+                </button>
+                <button
+                  type="button"
+                  className="button is-outline is-primary is-xs"
+                  onClick={() => handleDownload(spriteIndex)}
+                >
+                  <FiDownload className="icon" />
+                  <span className="text">ダウンロード</span>
+                </button>
+              </div>
+            </div>
+            <ul className="sprite-items">
+              {sprite.symbols.map((symbol, symbolIndex) => (
+                <li className="sprite-item" key={symbolIndex}>
+                  <button
+                    type="button"
+                    className="button is-delete is-melt is-danger is-square is-xs"
+                    onClick={() => handleRemove(spriteIndex, symbolIndex)}
+                  >
+                    <FiTrash2 className="icon" />
+                  </button>
+                  <div className="box is-pt-xxl is-pb-lg is-px-sm is-space-sm">
+                    <div className="box">
+                      <svg
+                        className="sprite-svg"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox={symbol.viewBox}
+                        dangerouslySetInnerHTML={{ __html: symbol.paths }}
+                      />
+                    </div>
+                    {editing?.spriteIndex === spriteIndex &&
+                    editing?.symbolIndex === symbolIndex ? (
+                      <div className="box is-flex is-mono">
+                        <input
+                          type="text"
+                          className="input is-flex-full is-xs"
+                          defaultValue={symbol.id}
+                          onBlur={(e) =>
+                            handleEditEnd(
+                              e.target.value,
+                              spriteIndex,
+                              symbolIndex
+                            )
+                          }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleEditEnd(
+                                e.currentTarget.value,
+                                spriteIndex,
+                                symbolIndex
+                              )
+                            }
+                          }}
+                          autoFocus
+                        />
+                      </div>
+                    ) : (
+                      <p className="text is-mono is-center is-line-height-xs is-xs">
+                        {symbol.id}
+                      </p>
+                    )}
                   </div>
-                  <p className="text is-mono is-center is-line-height-xs is-xs">
-                    {item.id}
-                  </p>
+                  <div className="box is-flex is-outline-top">
+                    <button
+                      type="button"
+                      className="button is-edit is-melt is-flex-0 is-xxs"
+                      onClick={() => handleEditStart(spriteIndex, symbolIndex)}
+                    >
+                      <FiEdit3 className="icon" />
+                      <span className="text is-mono is-py-xxs">ID</span>
+                    </button>
+                    <div className="box is-outline-left" />
+                    <button
+                      type="button"
+                      className="button is-download is-melt is-flex-0 is-xxs"
+                      onClick={() => handleDownload(spriteIndex, symbolIndex)}
+                    >
+                      <FiDownload className="icon" />
+                      <span className="text is-mono is-py-xxs">SVG</span>
+                    </button>
+                  </div>
                 </li>
               ))}
+              <div
+                className={clsx(
+                  "selection is-min-height-150px",
+                  dragging === `symbol-${spriteIndex}` && "is-over"
+                )}
+                data-name="symbol"
+                onDragOver={(e) => handleDragOver(e, "symbol", spriteIndex)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, "symbol", spriteIndex)}
+              >
+                <div className="box is-space-sm">
+                  <p className="text is-mono is-center is-xs">Drag & Drop</p>
+                  <div className="box is-flex is-center">
+                    <button
+                      className="button is-outline is-sm"
+                      type="button"
+                      onClick={() =>
+                        addSymbolRefs.current[spriteIndex]?.click()
+                      }
+                    >
+                      <FiPlus className="icon" />
+                      <span className="text">追加</span>
+                    </button>
+                    <input
+                      type="file"
+                      style={{ display: "none" }}
+                      ref={(el) => {
+                        if (el) addSymbolRefs.current[spriteIndex] = el
+                      }}
+                      multiple
+                      onChange={(e) => handleFile(e, "symbol", spriteIndex)}
+                    />
+                  </div>
+                </div>
+              </div>
             </ul>
-          </article>
+          </div>
         ))}
       </main>
-      <aside className="aside">
+
+      <aside className="box">
         <div
-          className={isDraggingOver ? "selection is-over" : "selection"}
-          onDragEnter={handleDragEnter}
-          onDragOver={handleDragOver}
+          className={clsx(
+            "selection is-min-height-30vh",
+            dragging === "sprite" && "is-over"
+          )}
+          data-name="sprite"
+          onDragOver={(e) => handleDragOver(e, "sprite")}
           onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
+          onDrop={(e) => handleDrop(e, "sprite")}
         >
-          <div className="box is-space-sm">
-            <p className="text is-center">ファイルをドラッグアンドドロップ</p>
-            <div className="box is-flex is-center">
+          <div className="box is-space-md">
+            <p className="text is-mono is-center is-sm">Drag and Drop Area</p>
+            <div className="box is-flex is-middle is-center is-gap-sm">
               <input
-                className="button is-outline"
+                className="button is-outline is-sm"
                 type="button"
                 value="ファイルを選択"
-                onClick={() => attachRef.current?.click()}
+                onClick={() => addSpriteRef.current?.click()}
               />
               <input
                 type="file"
                 style={{ display: "none" }}
-                ref={attachRef}
+                ref={addSpriteRef}
                 multiple
-                onChange={handleInput}
+                onChange={(e) => handleFile(e, "sprite")}
               />
+              <span className="text is-sm">or</span>
+              <button
+                className="button is-plain is-primary is-sm"
+                type="button"
+                onClick={handleNew}
+              >
+                新規作成
+              </button>
             </div>
           </div>
         </div>

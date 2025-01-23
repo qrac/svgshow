@@ -1,56 +1,38 @@
 {
   "name": "svgshow",
-  "description": "SVG Sprite Viewer",
-  "version": "0.3.2",
+  "private": true,
+  "version": "1.0.0",
   "type": "module",
   "license": "MIT",
-  "homepage": "https://github.com/qrac/svgshow",
   "repository": {
     "type": "git",
     "url": "https://github.com/qrac/svgshow"
   },
-  "bugs": {
-    "url": "https://github.com/qrac/svgshow/issues"
-  },
-  "keywords": [
-    "svg",
-    "svg-sprite",
-    "viewer",
-    "japanese",
-    "svgshow"
-  ],
-  "author": {
-    "name": "Qrac",
-    "url": "https://qrac.jp"
-  },
-  "organization": {
-    "name": "QRANOKO",
-    "url": "https://qranoko.jp"
-  },
   "scripts": {
     "dev": "vite",
+    "dev:h": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
+    "preview:h": "vite preview --host",
     "clean": "rimraf ./dist",
     "up": "npx npm-check-updates",
     "up:u": "npx npm-check-updates -u"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
-    "dompurify": "^3.2.3",
-    "musubii": "^8.3.0",
-    "preact": "^10.25.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "clsx": "^2.1.1",
+    "musubii": "^8.6.0",
+    "preact": "^10.25.4",
     "react-icons": "^5.4.0",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.3",
-    "vite-plugin-svgr": "^4.3.0"
+    "svgo": "^3.3.2"
   },
   "devDependencies": {
-    "@types/dompurify": "^3.2.0",
-    "@types/node": "^22.10.1",
-    "@types/react": "^19.0.1",
-    "@types/react-dom": "^19.0.1"
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
   }
 }
